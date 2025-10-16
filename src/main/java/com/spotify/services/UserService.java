@@ -8,6 +8,7 @@ import com.spotify.exceptions.EmailAlreadyExistsException;
 import com.spotify.business.security.JwtUtil;
 import com.spotify.exceptions.ForbiddenOperationException;
 import com.spotify.exceptions.InvalidCredentialsException;
+import com.spotify.repositories.PasswordResetTokenRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +18,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
+    public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.jwtUtil = jwtUtil;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Transactional
@@ -46,6 +49,7 @@ public class UserService {
             throw new ForbiddenOperationException("Operação não permitida. Você só pode deletar o próprio usuário.");
         return userRepository.findById(id)
             .map(user -> {
+                passwordResetTokenRepository.deleteByUser(user);
                 userRepository.deleteById(id);
                 return ResponseDTO.success("Usuário deletado com sucesso");
             })
