@@ -5,8 +5,10 @@ import com.spotify.business.ResponseDTO;
 import com.spotify.services.UserService;
 import com.spotify.business.dto.LoginRequestDTO;
 import com.spotify.business.dto.LoginResponseDTO;
+import com.spotify.business.dto.PasswordResetRequestDTO;
+import com.spotify.business.dto.PasswordResetConfirmDTO;
 import com.spotify.services.AuthService;
-import com.spotify.exceptions.ForbiddenOperationException;
+import com.spotify.services.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,10 +26,12 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UserController {
     private final UserService userService;
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
-    public UserController(UserService userService, AuthService authService) {
+    public UserController(UserService userService, AuthService authService, PasswordResetService passwordResetService) {
         this.userService = userService;
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/register")
@@ -72,6 +76,34 @@ public class UserController {
     public ResponseEntity<ResponseDTO<Object>> deleteUser(@PathVariable String id, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         ResponseDTO<Object> response = userService.deleteUser(Long.valueOf(id), token);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/password-reset/request")
+    @Operation(summary = "Solicitar reset de senha", description = "Envia um email com token para reset de senha")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email de reset enviado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Erro de validação",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
+    })
+    public ResponseEntity<ResponseDTO<String>> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDTO request) {
+        ResponseDTO<String> response = passwordResetService.requestPasswordReset(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/password-reset/confirm")
+    @Operation(summary = "Confirmar reset de senha", description = "Redefine a senha do usuário usando o token recebido por email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Token inválido, expirado ou já utilizado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
+    })
+    public ResponseEntity<ResponseDTO<String>> resetPassword(@Valid @RequestBody PasswordResetConfirmDTO request) {
+        ResponseDTO<String> response = passwordResetService.resetPassword(request);
         return ResponseEntity.ok(response);
     }
 }
