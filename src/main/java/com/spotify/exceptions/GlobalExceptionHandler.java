@@ -34,4 +34,10 @@ public class GlobalExceptionHandler {
     public ResponseDTO<Void> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseDTO.error("INVALID_CREDENTIALS", "Email ou senha inválidos");
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseDTO<Void> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseDTO.error("USER_NOT_FOUND", ex.getMessage());
+    }
 }
