@@ -27,7 +27,7 @@ public class AuthService {
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException();
         }
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail());
         return new LoginResponseDTO(token);
     }
 }
