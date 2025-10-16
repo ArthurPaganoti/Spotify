@@ -40,4 +40,10 @@ public class GlobalExceptionHandler {
     public ResponseDTO<Void> handleUserNotFound(UserNotFoundException ex) {
         return ResponseDTO.error("USER_NOT_FOUND", ex.getMessage());
     }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseDTO<Void> handleForbiddenOperation(ForbiddenOperationException ex) {
+        return ResponseDTO.error("FORBIDDEN", ex.getMessage());
+    }
 }
