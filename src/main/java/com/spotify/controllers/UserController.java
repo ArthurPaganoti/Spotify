@@ -6,6 +6,7 @@ import com.spotify.services.UserService;
 import com.spotify.business.dto.LoginRequestDTO;
 import com.spotify.business.dto.LoginResponseDTO;
 import com.spotify.services.AuthService;
+import com.spotify.exceptions.ForbiddenOperationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/users")
@@ -63,11 +64,14 @@ public class UserController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Token JWT ausente ou inválido",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Operação não permitida. Você só pode deletar o próprio usuário.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
     })
-    public ResponseEntity<ResponseDTO<Object>> deleteUser(@PathVariable String id) {
-        ResponseDTO<Object> response = userService.deleteUser(Long.valueOf(id));
+    public ResponseEntity<ResponseDTO<Object>> deleteUser(@PathVariable String id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        ResponseDTO<Object> response = userService.deleteUser(Long.valueOf(id), token);
         return ResponseEntity.ok(response);
     }
 }
