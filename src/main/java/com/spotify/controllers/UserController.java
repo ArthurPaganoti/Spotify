@@ -39,11 +39,7 @@ public class UserController {
     })
     public ResponseEntity<ResponseDTO<String>> register(@Valid @RequestBody UserRegisterDTO dto) {
         ResponseDTO<String> response = userService.register(dto);
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.badRequest().body(response);
-        }
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/auth")
