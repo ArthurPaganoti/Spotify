@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: Spotify
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/${DB_NAME:spotify}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          order_inserts: true
+          order_updates: true
+          batch_size: 30
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: redis
+
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+    locations: classpath:db/migration
+
+jwt:
+  secret: 4vINmku10CN4zYW2nZeF
+  expiration: 3600
+
+system:
+  secret: 4vINmku10CN4zYW2nZeF
+
+server:
+  port: 8080
+
+
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: false
+logging:
+  level:
+    root: info
+    org.hibernate.sql: debug
+    org.springframework: info
+
