@@ -44,6 +44,7 @@ public class SecurityConfig {
                     "/webjars/**",
                     "/users/auth",
                     "/users/register",
+                    "/users/password-reset/**",
                     "/error"
                 ).permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/users/**").authenticated()
