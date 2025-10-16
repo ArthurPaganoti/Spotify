@@ -62,6 +62,49 @@ Exemplo de resposta:
 
 ---
 
+### DELETE /users/{id}
+Remove um usuário do sistema. **Requer autenticação JWT.** O usuário só pode deletar o próprio usuário.
+
+Exemplo de requisição:
+```
+DELETE /users/1
+Authorization: Bearer <seu_token_jwt>
+```
+Exemplo de resposta (sucesso):
+```json
+{
+  "success": true,
+  "message": "Usuário deletado com sucesso",
+  "data": null
+}
+```
+Exemplo de resposta (erro - usuário não encontrado):
+```json
+{
+  "success": false,
+  "message": "Usuário não encontrado",
+  "data": null
+}
+```
+Exemplo de resposta (erro - token ausente ou inválido):
+```json
+{
+  "success": false,
+  "code": "INVALID_CREDENTIALS",
+  "message": "Email ou senha inválidos"
+}
+```
+Exemplo de resposta (erro - operação não permitida):
+```json
+{
+  "success": false,
+  "code": "FORBIDDEN",
+  "message": "Operação não permitida. Você só pode deletar o próprio usuário."
+}
+```
+
+---
+
 ## Observações
 - Novas funcionalidades serão adicionadas em breve.
 - Para mais detalhes, consulte a documentação Swagger em: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
