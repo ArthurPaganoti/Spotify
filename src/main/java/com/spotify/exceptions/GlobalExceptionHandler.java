@@ -28,4 +28,10 @@ public class GlobalExceptionHandler {
         );
         return ResponseDTO.error("VALIDATION_ERROR", "Erro de validação nos campos");
     }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseDTO<Void> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseDTO.error("INVALID_CREDENTIALS", "Email ou senha inválidos");
+    }
 }
