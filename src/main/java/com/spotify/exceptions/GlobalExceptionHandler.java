@@ -46,4 +46,16 @@ public class GlobalExceptionHandler {
     public ResponseDTO<Void> handleForbiddenOperation(ForbiddenOperationException ex) {
         return ResponseDTO.error("FORBIDDEN", ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseDTO<Void> handleInvalidToken(InvalidTokenException ex) {
+        return ResponseDTO.error("INVALID_TOKEN", ex.getMessage());
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseDTO<Void> handleBusinessException(BusinessException ex) {
+        return ResponseDTO.error("BUSINESS_ERROR", ex.getMessage());
+    }
 }
