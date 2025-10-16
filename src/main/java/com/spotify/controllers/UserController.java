@@ -59,4 +59,19 @@ public class UserController {
     public LoginResponseDTO login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         return authService.login(loginRequest);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar usuário", description = "Remove um usuário do sistema. Requer autenticação JWT.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Token JWT ausente ou inválido",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
+    })
+    public ResponseEntity<ResponseDTO<Object>> deleteUser(@PathVariable String id) {
+        ResponseDTO<Object> response = userService.deleteUser(Long.valueOf(id));
+        return ResponseEntity.ok(response);
+    }
 }

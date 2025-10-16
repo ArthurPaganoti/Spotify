@@ -31,4 +31,16 @@ public class UserService {
         userRepository.save(user);
         return ResponseDTO.success("Usuário registrado com sucesso");
     }
+
+    @Transactional
+    public ResponseDTO<Object> deleteUser(Long id) {
+        return userRepository.findById(id)
+            .map(user -> {
+                userRepository.deleteById(id);
+                return ResponseDTO.success("Usuário deletado com sucesso");
+            })
+            .orElseThrow(() -> {
+                return new com.spotify.exceptions.UserNotFoundException("Usuário não encontrado");
+            });
+    }
 }
