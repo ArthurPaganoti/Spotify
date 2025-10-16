@@ -31,11 +31,11 @@ spring:
     locations: classpath:db/migration
 
 jwt:
-  secret: 4vINmku10CN4zYW2nZeF
+  secret: # Your Secret Key
   expiration: 3600
 
 system:
-  secret: 4vINmku10CN4zYW2nZeF
+  secret: # Your System Secret Key
 
 server:
   port: 8080
