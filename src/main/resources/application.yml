@@ -59,7 +59,7 @@ app:
     from: # Your email
     fromName: # Your name
   password-reset:
-    expiration-hours: 1
+    expiration-hours: 24
 
 server:
   port: 8080
