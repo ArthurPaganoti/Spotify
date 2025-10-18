@@ -48,11 +48,11 @@ public class UserService {
         if (!authenticatedUserId.equals(id))
             throw new ForbiddenOperationException("Operação não permitida. Você só pode deletar o próprio usuário.");
         return userRepository.findById(id)
-            .map(user -> {
-                passwordResetTokenRepository.deleteByUser(user);
-                userRepository.deleteById(id);
-                return ResponseDTO.success("Usuário deletado com sucesso");
-            })
-            .orElseThrow(() -> new com.spotify.exceptions.UserNotFoundException("Usuário não encontrado"));
+                .map(user -> {
+                    passwordResetTokenRepository.deleteByUser(user);
+                    userRepository.deleteById(id);
+                    return ResponseDTO.success("Usuário deletado com sucesso");
+                })
+                .orElseThrow(() -> new com.spotify.exceptions.UserNotFoundException("Usuário não encontrado"));
     }
 }
