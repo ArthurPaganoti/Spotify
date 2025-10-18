@@ -58,4 +58,16 @@ public class GlobalExceptionHandler {
     public ResponseDTO<Void> handleBusinessException(BusinessException ex) {
         return ResponseDTO.error("BUSINESS_ERROR", ex.getMessage());
     }
+
+    @ExceptionHandler(MusicNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseDTO<Void> handleMusicNotFound(MusicNotFoundException ex) {
+        return ResponseDTO.error("MUSIC_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateMusicException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseDTO<Void> handleDuplicateMusic(DuplicateMusicException ex) {
+        return ResponseDTO.error("DUPLICATE_MUSIC", ex.getMessage());
+    }
 }
