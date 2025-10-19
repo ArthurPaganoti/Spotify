@@ -31,34 +31,27 @@ public class PlaylistCollaboratorService {
 
     @Transactional
     public CollaboratorDTO inviteCollaborator(Long playlistId, InviteCollaboratorRequest request, String ownerEmail) {
-        // Busca o dono da playlist
         User owner = userRepository.findByEmail(ownerEmail)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // Busca a playlist
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Playlist não encontrada"));
 
-        // Verifica se o usuário é o dono da playlist
         if (!playlist.getUser().getId().equals(owner.getId())) {
             throw new RuntimeException("Apenas o dono da playlist pode convidar colaboradores");
         }
 
-        // Busca o usuário que será convidado
         User invitedUser = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário com email " + request.getEmail() + " não encontrado"));
 
-        // Não pode convidar a si mesmo
         if (invitedUser.getId().equals(owner.getId())) {
             throw new RuntimeException("Você não pode convidar a si mesmo como colaborador");
         }
 
-        // Verifica se já existe um convite
         if (collaboratorRepository.findByPlaylistAndUser(playlist, invitedUser).isPresent()) {
             throw new RuntimeException("Este usuário já foi convidado para esta playlist");
         }
 
-        // Cria o convite
         PlaylistCollaborator collaborator = new PlaylistCollaborator();
         collaborator.setPlaylist(playlist);
         collaborator.setUser(invitedUser);
@@ -79,18 +72,15 @@ public class PlaylistCollaboratorService {
         PlaylistCollaborator collaborator = collaboratorRepository.findById(inviteId)
                 .orElseThrow(() -> new RuntimeException("Convite não encontrado"));
 
-        // Verifica se o convite é para este usuário
         if (!collaborator.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Este convite não é para você");
         }
 
-        // Verifica se o convite ainda está pendente
         if (collaborator.getStatus() != PlaylistCollaborator.CollaboratorStatus.PENDING) {
             throw new RuntimeException("Este convite já foi respondido");
         }
 
-        // Atualiza o status
-        collaborator.setStatus(accept ? 
+        collaborator.setStatus(accept ?
             PlaylistCollaborator.CollaboratorStatus.ACCEPTED : 
             PlaylistCollaborator.CollaboratorStatus.REJECTED);
         collaborator.setRespondedAt(LocalDateTime.now());
@@ -108,7 +98,6 @@ public class PlaylistCollaboratorService {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Playlist não encontrada"));
 
-        // Verifica se o usuário é o dono da playlist
         if (!playlist.getUser().getId().equals(owner.getId())) {
             throw new RuntimeException("Apenas o dono da playlist pode remover colaboradores");
         }
@@ -116,7 +105,6 @@ public class PlaylistCollaboratorService {
         PlaylistCollaborator collaborator = collaboratorRepository.findById(collaboratorId)
                 .orElseThrow(() -> new RuntimeException("Colaborador não encontrado"));
 
-        // Verifica se o colaborador pertence a esta playlist
         if (!collaborator.getPlaylist().getId().equals(playlistId)) {
             throw new RuntimeException("Este colaborador não pertence a esta playlist");
         }
@@ -132,7 +120,6 @@ public class PlaylistCollaboratorService {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Playlist não encontrada"));
 
-        // Verifica se o usuário é o dono da playlist
         if (!playlist.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Apenas o dono da playlist pode ver os colaboradores");
         }
