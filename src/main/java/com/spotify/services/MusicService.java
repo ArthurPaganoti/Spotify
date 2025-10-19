@@ -69,18 +69,12 @@ public class MusicService {
     }
 
     public List<MusicResponseDTO> getAllMusics(String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
-
         return musicRepository.findAll().stream()
                 .map(musicMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
     public MusicResponseDTO getMusicById(String musicId, String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
-
         Music music = musicRepository.findById(musicId)
                 .orElseThrow(() -> new MusicNotFoundException("Música não encontrada"));
         return musicMapper.toResponseDTO(music);
