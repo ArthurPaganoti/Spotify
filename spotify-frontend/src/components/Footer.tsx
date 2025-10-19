@@ -14,6 +14,17 @@ export const Footer: React.FC = () => {
           @StudiosWild
         </a>
       </div>
+      <div className="text-center text-spotify-lightgray text-xs mt-2 opacity-100">
+        Desenvolvido por{' '}
+        <a
+          href="https://github.com/ArthurPaganoti"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-spotify-green hover:underline transition-colors"
+        >
+          @Art.
+        </a>
+      </div>
     </footer>
   );
 };
