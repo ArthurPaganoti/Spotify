@@ -17,18 +17,15 @@ public class ImageValidator {
             throw new IllegalArgumentException("Arquivo de imagem é obrigatório");
         }
 
-        // Validar tipo de arquivo
         String contentType = file.getContentType();
         if (contentType == null || !isAllowedType(contentType)) {
             throw new IllegalArgumentException("Tipo de arquivo inválido. Permitidos: JPEG, PNG, WEBP");
         }
 
-        // Validar tamanho do arquivo
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("Arquivo muito grande. Tamanho máximo: 5MB");
         }
 
-        // Validar dimensões
         BufferedImage image = ImageIO.read(file.getInputStream());
         if (image == null) {
             throw new IllegalArgumentException("Arquivo de imagem corrompido ou inválido");

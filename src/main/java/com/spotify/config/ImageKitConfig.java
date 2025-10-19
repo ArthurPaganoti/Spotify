@@ -29,4 +29,3 @@ public class ImageKitConfig {
         return imageKit;
     }
 }
-
