@@ -7,6 +7,7 @@ import com.spotify.business.dto.LoginRequestDTO;
 import com.spotify.business.dto.LoginResponseDTO;
 import com.spotify.business.dto.PasswordResetRequestDTO;
 import com.spotify.business.dto.PasswordResetConfirmDTO;
+import com.spotify.business.security.RateLimit;
 import com.spotify.services.AuthService;
 import com.spotify.services.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,11 +37,14 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @RateLimit(requests = 5, perMinutes = 15)
     @Operation(summary = "Registrar novo usuário", description = "Cria um novo usuário no sistema")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
         @ApiResponse(responseCode = "400", description = "Erro de validação ou email já cadastrado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+        @ApiResponse(responseCode = "429", description = "Muitas requisições. Tente novamente mais tarde.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
     })
     public ResponseEntity<ResponseDTO<String>> register(@Valid @RequestBody UserRegisterDTO dto) {
@@ -49,6 +53,7 @@ public class UserController {
     }
 
     @PostMapping("/auth")
+    @RateLimit(requests = 5, perMinutes = 5)
     @Operation(summary = "Autenticação do usuário", description = "Autentica o usuário e retorna um token JWT em caso de sucesso.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Login realizado com sucesso",
@@ -56,6 +61,8 @@ public class UserController {
         @ApiResponse(responseCode = "400", description = "Requisição inválida",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
         @ApiResponse(responseCode = "401", description = "Credenciais inválidas",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+        @ApiResponse(responseCode = "429", description = "Muitas tentativas de login. Tente novamente mais tarde.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
     })
     public LoginResponseDTO login(@Valid @RequestBody LoginRequestDTO loginRequest) {
@@ -86,6 +93,7 @@ public class UserController {
     }
 
     @PostMapping("/password-reset/request")
+    @RateLimit(requests = 3, perMinutes = 15)
     @Operation(summary = "Solicitar reset de senha", description = "Envia um email com token para reset de senha")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email de reset enviado com sucesso",
@@ -93,6 +101,8 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Erro de validação",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "429", description = "Muitas requisições. Tente novamente mais tarde.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
     })
     public ResponseEntity<ResponseDTO<String>> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDTO request) {
@@ -101,11 +111,14 @@ public class UserController {
     }
 
     @PostMapping("/password-reset/confirm")
+    @RateLimit(requests = 3, perMinutes = 15)
     @Operation(summary = "Confirmar reset de senha", description = "Redefine a senha do usuário usando o token recebido por email")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Token inválido, expirado ou já utilizado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "429", description = "Muitas requisições. Tente novamente mais tarde.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
     })
     public ResponseEntity<ResponseDTO<String>> resetPassword(@Valid @RequestBody PasswordResetConfirmDTO request) {
