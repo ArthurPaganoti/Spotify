@@ -5,6 +5,7 @@ import com.spotify.business.dto.UserProfileUpdateDTO;
 import com.spotify.entities.User;
 import com.spotify.exceptions.UserNotFoundException;
 import com.spotify.repositories.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,10 +18,12 @@ import java.util.Map;
 public class UserProfileService {
     private final UserRepository userRepository;
     private final ImageKitStorageService imageKitStorageService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserProfileService(UserRepository userRepository, ImageKitStorageService imageKitStorageService) {
+    public UserProfileService(UserRepository userRepository, ImageKitStorageService imageKitStorageService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.imageKitStorageService = imageKitStorageService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserProfileResponseDTO getProfile(String email) {
@@ -35,10 +38,20 @@ public class UserProfileService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
 
-        // Verifica se o novo email já está em uso por outro usuário
-        if (!user.getEmail().equals(updateDTO.getEmail())) {
+        String currentEmail = user.getEmail().trim().toLowerCase();
+        String newEmail = updateDTO.getEmail().trim().toLowerCase();
+        String currentName = user.getName().trim();
+        String newName = updateDTO.getName().trim();
+
+        if (currentEmail.equals(newEmail) && currentName.equals(newName)) {
+            throw new IllegalArgumentException("Nenhuma alteração foi detectada. Modifique pelo menos um campo para atualizar o perfil.");
+        }
+
+        if (!currentEmail.equals(newEmail)) {
             userRepository.findByEmail(updateDTO.getEmail()).ifPresent(u -> {
-                throw new RuntimeException("Email já está em uso");
+                if (!u.getId().equals(user.getId())) {
+                    throw new IllegalArgumentException("Este email já está sendo usado por outro usuário");
+                }
             });
         }
 
@@ -56,12 +69,10 @@ public class UserProfileService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
 
-        // Deleta avatar antigo se existir
         if (user.getAvatarFileId() != null && !user.getAvatarFileId().isEmpty()) {
             imageKitStorageService.deleteMusicCover(user.getAvatarFileId());
         }
 
-        // Faz upload do novo avatar
         Map<String, String> uploadResult = imageKitStorageService.uploadMusicCover(avatar);
         user.setAvatarUrl(uploadResult.get("url"));
         user.setAvatarFileId(uploadResult.get("fileId"));
@@ -86,5 +97,34 @@ public class UserProfileService {
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
-}
 
+    @Transactional
+    public void changePassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("A nova senha deve ser diferente da senha atual");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteAccount(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+
+        if (user.getAvatarFileId() != null && !user.getAvatarFileId().isEmpty()) {
+            try {
+                imageKitStorageService.deleteMusicCover(user.getAvatarFileId());
+            } catch (Exception e) {
+                System.err.println("Erro ao deletar avatar: " + e.getMessage());
+            }
+        }
+
+        userRepository.delete(user);
+    }
+}

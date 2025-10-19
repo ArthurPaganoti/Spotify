@@ -7,9 +7,13 @@ import com.spotify.business.dto.LoginRequestDTO;
 import com.spotify.business.dto.LoginResponseDTO;
 import com.spotify.business.dto.PasswordResetRequestDTO;
 import com.spotify.business.dto.PasswordResetConfirmDTO;
+import com.spotify.business.dto.UserProfileResponseDTO;
+import com.spotify.business.dto.UserProfileUpdateDTO;
+import com.spotify.business.dto.ChangePasswordDTO;
 import com.spotify.business.security.RateLimit;
 import com.spotify.services.AuthService;
 import com.spotify.services.PasswordResetService;
+import com.spotify.services.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,6 +25,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users")
@@ -29,11 +34,13 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+    private final UserProfileService userProfileService;
 
-    public UserController(UserService userService, AuthService authService, PasswordResetService passwordResetService) {
+    public UserController(UserService userService, AuthService authService, PasswordResetService passwordResetService, UserProfileService userProfileService) {
         this.userService = userService;
         this.authService = authService;
         this.passwordResetService = passwordResetService;
+        this.userProfileService = userProfileService;
     }
 
     @PostMapping("/register")
@@ -90,6 +97,81 @@ public class UserController {
             Authentication authentication) {
         ResponseDTO<Object> response = userService.deleteUser(Long.valueOf(id), authentication.getName());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/profile")
+    @Operation(
+        summary = "Obter perfil do usuário",
+        description = "Retorna os dados do perfil do usuário autenticado",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ResponseDTO<UserProfileResponseDTO>> getProfile(Authentication authentication) {
+        UserProfileResponseDTO profile = userProfileService.getProfile(authentication.getName());
+        return ResponseEntity.ok(ResponseDTO.success(profile, "Perfil obtido com sucesso"));
+    }
+
+    @PutMapping("/profile")
+    @Operation(
+        summary = "Atualizar perfil do usuário",
+        description = "Atualiza nome e email do usuário autenticado",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ResponseDTO<UserProfileResponseDTO>> updateProfile(
+            @Valid @RequestBody UserProfileUpdateDTO updateDTO,
+            Authentication authentication) {
+        UserProfileResponseDTO profile = userProfileService.updateProfile(authentication.getName(), updateDTO);
+        return ResponseEntity.ok(ResponseDTO.success(profile, "Perfil atualizado com sucesso"));
+    }
+
+    @PostMapping("/profile/avatar")
+    @Operation(
+        summary = "Atualizar avatar do usuário",
+        description = "Faz upload de uma nova foto de perfil",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ResponseDTO<UserProfileResponseDTO>> updateAvatar(
+            @RequestParam("avatar") MultipartFile avatar,
+            Authentication authentication) throws Exception {
+        UserProfileResponseDTO profile = userProfileService.updateAvatar(authentication.getName(), avatar);
+        return ResponseEntity.ok(ResponseDTO.success(profile, "Avatar atualizado com sucesso"));
+    }
+
+    @DeleteMapping("/profile/avatar")
+    @Operation(
+        summary = "Remover avatar do usuário",
+        description = "Remove a foto de perfil do usuário",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ResponseDTO<String>> deleteAvatar(Authentication authentication) {
+        userProfileService.deleteAvatar(authentication.getName());
+        return ResponseEntity.ok(ResponseDTO.success("Avatar removido com sucesso"));
+    }
+
+    @PutMapping("/profile/password")
+    @Operation(
+        summary = "Alterar senha do usuário",
+        description = "Altera a senha do usuário autenticado",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ResponseDTO<String>> changePassword(
+            @Valid @RequestBody ChangePasswordDTO changePasswordDTO,
+            Authentication authentication) {
+        userProfileService.changePassword(
+            authentication.getName(),
+            changePasswordDTO.getNewPassword()
+        );
+        return ResponseEntity.ok(ResponseDTO.success("Senha alterada com sucesso"));
+    }
+
+    @DeleteMapping("/profile/account")
+    @Operation(
+        summary = "Deletar conta do usuário",
+        description = "Deleta permanentemente a conta do usuário autenticado e todos os seus dados",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ResponseDTO<String>> deleteAccount(Authentication authentication) {
+        userProfileService.deleteAccount(authentication.getName());
+        return ResponseEntity.ok(ResponseDTO.success("Conta deletada com sucesso"));
     }
 
     @PostMapping("/password-reset/request")
