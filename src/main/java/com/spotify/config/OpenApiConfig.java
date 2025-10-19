@@ -15,9 +15,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Spotify API")
+                        .title("Wild Music API")
                         .version("1.0.0")
-                        .description("API Rest - Spotify")
+                        .description("API Rest - Wild Music")
                         .contact(new Contact()
                                 .name("Arthur Paganoti")
                                 .email("paganotiarthur@gmail.com")))
@@ -33,4 +33,3 @@ public class OpenApiConfig {
                 );
     }
 }
-

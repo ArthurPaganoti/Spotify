@@ -1,4 +1,4 @@
-# Spotify API
+# Wild Music API
 
 Este projeto é uma API REST com front-end em React para gerenciamento de músicas.
 
