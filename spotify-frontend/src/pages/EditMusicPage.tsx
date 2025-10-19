@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Music, Edit, Image as ImageIcon, X } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Footer } from '../components/Footer';
+import { ProfileMenu } from '../components/ProfileMenu';
 import { musicService } from '../services/musicService';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -14,6 +15,11 @@ export const EditMusicPage: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+
+  const [originalName, setOriginalName] = useState('');
+  const [originalBand, setOriginalBand] = useState('');
+  const [originalGenre, setOriginalGenre] = useState('');
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -31,7 +37,16 @@ export const EditMusicPage: React.FC = () => {
         setBand(music.band);
         setGenre(music.genre);
         setCurrentImageUrl(music.imageUrl || null);
+
+        setOriginalName(music.name);
+        setOriginalBand(music.band);
+        setOriginalGenre(music.genre);
       } catch (err: any) {
+        if (err.response?.status === 403 || err.response?.data?.message?.includes('permissão')) {
+          alert('Você não tem permissão para editar esta música. Apenas quem adicionou pode editá-la.');
+          navigate('/home');
+          return;
+        }
         setError(err.response?.data?.message || 'Erro ao carregar música.');
       } finally {
         setLoadingData(false);
@@ -39,7 +54,7 @@ export const EditMusicPage: React.FC = () => {
     };
 
     loadMusic();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,6 +89,17 @@ export const EditMusicPage: React.FC = () => {
     e.preventDefault();
     if (!id) return;
 
+    const noChanges =
+      name === originalName &&
+      band === originalBand &&
+      genre === originalGenre &&
+      !image;
+
+    if (noChanges) {
+      setError('Nenhuma alteração foi feita. Modifique pelo menos um campo para atualizar a música.');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
@@ -103,7 +129,11 @@ export const EditMusicPage: React.FC = () => {
     <div className="flex h-screen bg-black">
       <Sidebar />
       
-      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black flex flex-col">
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black flex flex-col relative">
+        <div className="absolute top-4 right-4 z-10">
+          <ProfileMenu />
+        </div>
+
         <div className="p-8 flex-1">
           <div className="max-w-2xl mx-auto">
             <div className="mb-8">
@@ -258,4 +288,3 @@ export const EditMusicPage: React.FC = () => {
     </div>
   );
 };
-

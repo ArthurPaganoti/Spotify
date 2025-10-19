@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { Footer } from '../components/Footer';
 import { ProfileMenu } from '../components/ProfileMenu';
+import { profileService } from '../services/profileService';
 import { Key, Lock, Save, ArrowLeft } from 'lucide-react';
 
 export const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,6 @@ export const ChangePasswordPage: React.FC = () => {
     setError('');
     setSuccess('');
 
-    // Validações
     if (newPassword.length < 6) {
       setError('A nova senha deve ter no mínimo 6 caracteres');
       return;
@@ -30,26 +29,16 @@ export const ChangePasswordPage: React.FC = () => {
       return;
     }
 
-    if (currentPassword === newPassword) {
-      setError('A nova senha deve ser diferente da senha atual');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // TODO: Implementar chamada à API para mudar senha
-      // await passwordService.changePassword({ currentPassword, newPassword });
-      
-      // Simulação temporária
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await profileService.changePassword({ newPassword });
       setSuccess('Senha alterada com sucesso!');
       setTimeout(() => {
         navigate('/profile');
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erro ao alterar senha');
+      setError(err.response?.data?.message || 'Erro ao alterar senha.');
     } finally {
       setLoading(false);
     }
@@ -99,51 +88,34 @@ export const ChangePasswordPage: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-spotify-lightgray mb-2 font-semibold flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  Senha Atual
+                  <Key className="w-4 h-4" />
+                  Nova Senha
                 </label>
                 <input
                   type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full bg-black text-white px-4 py-3 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
                   required
-                  placeholder="Digite sua senha atual"
+                  minLength={6}
+                  placeholder="Digite sua nova senha (mín. 6 caracteres)"
                 />
               </div>
 
-              <div className="pt-4 border-t border-spotify-gray">
-                <div className="mb-6">
-                  <label className="block text-spotify-lightgray mb-2 font-semibold flex items-center gap-2">
-                    <Key className="w-4 h-4" />
-                    Nova Senha
-                  </label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-black text-white px-4 py-3 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
-                    required
-                    minLength={6}
-                    placeholder="Digite sua nova senha (mín. 6 caracteres)"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-spotify-lightgray mb-2 font-semibold flex items-center gap-2">
-                    <Key className="w-4 h-4" />
-                    Confirmar Nova Senha
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-black text-white px-4 py-3 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
-                    required
-                    minLength={6}
-                    placeholder="Digite novamente a nova senha"
-                  />
-                </div>
+              <div>
+                <label className="block text-spotify-lightgray mb-2 font-semibold flex items-center gap-2">
+                  <Key className="w-4 h-4" />
+                  Confirmar Nova Senha
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-black text-white px-4 py-3 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
+                  required
+                  minLength={6}
+                  placeholder="Digite novamente a nova senha"
+                />
               </div>
 
               <div className="bg-spotify-gray/50 rounded-lg p-4 mt-6">
@@ -185,4 +157,3 @@ export const ChangePasswordPage: React.FC = () => {
     </div>
   );
 };
-

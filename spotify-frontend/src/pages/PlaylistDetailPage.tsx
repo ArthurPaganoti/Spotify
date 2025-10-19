@@ -6,17 +6,20 @@ import { musicService } from '../services/musicService';
 import { Sidebar } from '../components/Sidebar';
 import { Footer } from '../components/Footer';
 import { ProfileMenu } from '../components/ProfileMenu';
-import { MusicPlayer } from '../components/MusicPlayer';
-import { Lock, Globe, Music as MusicIcon, Plus, Trash2, X, Search } from 'lucide-react';
+import MusicPlayer from '../components/MusicPlayer';
+import CollaboratorsModal from '../components/CollaboratorsModal';
+import { Lock, Globe, Music as MusicIcon, Plus, Trash2, X, Search, Play, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { MusicResponseDTO } from '../types';
+import type { MusicResponseDTO } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 export const PlaylistDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [currentMusic, setCurrentMusic] = useState<string | null>(null);
+  const [currentMusic, setCurrentMusic] = useState<{ videoId: string; name: string; band: string } | null>(null);
   const [showAddMusicModal, setShowAddMusicModal] = useState(false);
+  const [showCollaboratorsModal, setShowCollaboratorsModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: playlist, isLoading } = useQuery({
@@ -25,11 +28,13 @@ export const PlaylistDetailPage: React.FC = () => {
     enabled: !!id,
   });
 
-  const { data: allMusics } = useQuery({
+  const { data: allMusicsResponse } = useQuery({
     queryKey: ['allMusics'],
-    queryFn: musicService.getAllMusics,
+    queryFn: () => musicService.getAllMusics(0, 1000),
     enabled: showAddMusicModal,
   });
+
+  const allMusics = allMusicsResponse?.content || [];
 
   const addMusicMutation = useMutation({
     mutationFn: ({ playlistId, musicId }: { playlistId: number; musicId: string }) =>
@@ -100,6 +105,11 @@ export const PlaylistDetailPage: React.FC = () => {
   const playlistMusicIds = playlist?.musics.map(m => m.id) || [];
   const availableMusics = filteredMusics?.filter((music: MusicResponseDTO) => !playlistMusicIds.includes(music.id));
 
+  const { user } = useAuth();
+  const isOwner = !!(user && playlist && user.id === playlist.userId);
+  const isCollaborator = playlist?.isCollaborator || false;
+  const canEdit = isOwner || isCollaborator;
+
   if (isLoading) {
     return (
       <div className="flex h-screen bg-gray-900 text-white items-center justify-center">
@@ -157,19 +167,30 @@ export const PlaylistDetailPage: React.FC = () => {
                 {playlist.musics.length === 1 ? 'música' : 'músicas'}
               </p>
               <div className="flex items-center gap-4 mt-6">
-                <button
-                  onClick={() => setShowAddMusicModal(true)}
-                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full font-semibold transition"
-                >
-                  <Plus className="w-5 h-5" />
-                  Adicionar Músicas
-                </button>
+                {canEdit && (
+                  <button
+                    onClick={() => setShowAddMusicModal(true)}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full font-semibold transition"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Adicionar Músicas
+                  </button>
+                )}
                 <button
                   onClick={() => navigate('/library')}
                   className="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-full font-semibold transition"
                 >
                   Voltar
                 </button>
+                {isOwner && (
+                  <button
+                    onClick={() => setShowCollaboratorsModal(true)}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full font-semibold transition"
+                  >
+                    <Users className="w-5 h-5" />
+                    Colaboradores
+                  </button>
+                )}
               </div>
             </div>
             <ProfileMenu />
@@ -185,10 +206,7 @@ export const PlaylistDetailPage: React.FC = () => {
                   className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-800 transition group"
                 >
                   <span className="text-gray-400 font-semibold w-8 text-center">{index + 1}</span>
-                  <div
-                    className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center flex-shrink-0 cursor-pointer hover:scale-105 transition"
-                    onClick={() => setCurrentMusic(music.youtubeVideoId || null)}
-                  >
+                  <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
                     {music.imageUrl || music.youtubeThumbnailUrl ? (
                       <img
                         src={music.imageUrl || music.youtubeThumbnailUrl}
@@ -202,14 +220,41 @@ export const PlaylistDetailPage: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold truncate">{music.name}</h3>
                     <p className="text-sm text-gray-400 truncate">{music.band}</p>
+                    {music.youtubeVideoId && (
+                      <div className="mt-1">
+                        {currentMusic?.videoId === music.youtubeVideoId ? (
+                          <button
+                            onClick={() => setCurrentMusic(null)}
+                            className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"
+                          >
+                            <X className="w-3 h-3" />
+                            Parar preview
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              if (music.youtubeVideoId) {
+                                setCurrentMusic({ videoId: music.youtubeVideoId, name: music.name, band: music.band });
+                              }
+                            }}
+                            className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                          >
+                            <Play className="w-3 h-3" />
+                            Tocar preview (30s)
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <span className="text-sm text-gray-400 hidden md:block">{music.genre}</span>
-                  <button
-                    onClick={() => handleRemoveMusic(music.id)}
-                    className="p-2 bg-red-600 hover:bg-red-700 rounded-full opacity-0 group-hover:opacity-100 transition"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {canEdit && (
+                    <button
+                      onClick={() => handleRemoveMusic(music.id)}
+                      className="p-2 bg-red-600 hover:bg-red-700 rounded-full opacity-0 group-hover:opacity-100 transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -218,13 +263,15 @@ export const PlaylistDetailPage: React.FC = () => {
               <MusicIcon className="w-16 h-16 mb-4" />
               <p className="text-xl mb-2">Playlist vazia</p>
               <p className="text-sm mb-4">Adicione músicas para começar a ouvir!</p>
-              <button
-                onClick={() => setShowAddMusicModal(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full font-semibold transition"
-              >
-                <Plus className="w-5 h-5" />
-                Adicionar Músicas
-              </button>
+              {canEdit && (
+                <button
+                  onClick={() => setShowAddMusicModal(true)}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full font-semibold transition"
+                >
+                  <Plus className="w-5 h-5" />
+                  Adicionar Músicas
+                </button>
+              )}
             </div>
           )}
         </main>
@@ -232,7 +279,13 @@ export const PlaylistDetailPage: React.FC = () => {
         <Footer />
       </div>
 
-      {currentMusic && <MusicPlayer videoId={currentMusic} onClose={() => setCurrentMusic(null)} />}
+      {currentMusic && (
+        <MusicPlayer
+          videoId={currentMusic.videoId}
+          musicName={currentMusic.name}
+          bandName={currentMusic.band}
+        />
+      )}
 
       {/* Modal de Adicionar Música */}
       {showAddMusicModal && (
@@ -282,6 +335,31 @@ export const PlaylistDetailPage: React.FC = () => {
                         <p className="text-sm text-gray-400 truncate">
                           {music.band} • {music.genre}
                         </p>
+                        {music.youtubeVideoId && (
+                          <div className="mt-1">
+                            {currentMusic?.videoId === music.youtubeVideoId ? (
+                              <button
+                                onClick={() => setCurrentMusic(null)}
+                                className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"
+                              >
+                                <X className="w-3 h-3" />
+                                Parar preview
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  if (music.youtubeVideoId) {
+                                    setCurrentMusic({ videoId: music.youtubeVideoId, name: music.name, band: music.band });
+                                  }
+                                }}
+                                className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                              >
+                                <Play className="w-3 h-3" />
+                                Tocar preview (30s)
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={() => handleAddMusic(music.id)}
@@ -306,7 +384,17 @@ export const PlaylistDetailPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Colaboradores */}
+      {showCollaboratorsModal && playlist && (
+        <CollaboratorsModal
+          isOpen={showCollaboratorsModal}
+          onClose={() => setShowCollaboratorsModal(false)}
+          playlistId={playlist.id}
+          playlistName={playlist.name}
+          isOwner={isOwner}
+        />
+      )}
     </div>
   );
 };
-

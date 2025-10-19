@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Music, Plus } from 'lucide-react';
+import { Music, Plus, Image as ImageIcon, X } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Footer } from '../components/Footer';
+import { ProfileMenu } from '../components/ProfileMenu';
 import { musicService } from '../services/musicService';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -10,10 +11,41 @@ export const AddMusicPage: React.FC = () => {
   const [name, setName] = useState('');
   const [band, setBand] = useState('');
   const [genre, setGenre] = useState('');
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor, selecione um arquivo de imagem válido');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setError('A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      setImage(file);
+      setError('');
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImage(null);
+    setImagePreview(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,11 +53,11 @@ export const AddMusicPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await musicService.addMusic({ name, band, genre });
-      await queryClient.invalidateQueries({ queryKey: ['musics'] });
+      await musicService.addMusic({ name, genre, band }, image || undefined);
+      queryClient.invalidateQueries({ queryKey: ['musics'] });
       navigate('/home');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erro ao adicionar música.');
+      setError(err.response?.data?.message || 'Erro ao adicionar música');
     } finally {
       setLoading(false);
     }
@@ -35,7 +67,11 @@ export const AddMusicPage: React.FC = () => {
     <div className="flex h-screen bg-black">
       <Sidebar />
       
-      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black flex flex-col">
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black flex flex-col relative">
+        <div className="absolute top-4 right-4 z-10">
+          <ProfileMenu />
+        </div>
+
         <div className="p-8 flex-1">
           <div className="max-w-2xl mx-auto">
             <div className="mb-8">
@@ -56,6 +92,51 @@ export const AddMusicPage: React.FC = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Upload de Imagem */}
+                <div>
+                  <label className="block text-white font-semibold mb-2">
+                    Capa da Música
+                  </label>
+                  <p className="text-spotify-lightgray text-sm mb-3">
+                    Dimensão recomendada: 640x640 pixels
+                  </p>
+
+                  {!imagePreview ? (
+                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-spotify-lightgray rounded-lg cursor-pointer hover:border-spotify-green transition-colors bg-spotify-darkgray">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <ImageIcon className="w-12 h-12 text-spotify-lightgray mb-3" />
+                        <p className="text-sm text-spotify-lightgray mb-1">
+                          <span className="font-semibold text-white">Clique para fazer upload</span> ou arraste a imagem
+                        </p>
+                        <p className="text-xs text-spotify-lightgray">
+                          PNG, JPG ou JPEG (MAX. 5MB)
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  ) : (
+                    <div className="relative w-48 h-48 mx-auto">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover rounded-lg shadow-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors shadow-lg"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label htmlFor="name" className="block text-white font-semibold mb-2">
                     Nome da Música *
