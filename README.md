@@ -1,17 +1,31 @@
 # Spotify API
 
-Este projeto é uma API REST.
+Este projeto é uma API REST com front-end em React para gerenciamento de músicas.
 
 ## Tecnologias
 
-- Java
+### Backend
+- Java 17
 - Spring Boot
 - PostgreSQL
 - Redis
 - Flyway
 - JWT
+- Swagger/OpenAPI
+
+### Frontend
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router DOM
+- TanStack Query (React Query)
+- Axios
+- Lucide React (ícones)
 
 ## Como executar
+
+### Backend
 
 1. Configure o banco de dados PostgreSQL e o Redis conforme as variáveis no `application.yml`.
 2. Ajuste as secrets de JWT e do sistema no arquivo `application.yml`.
@@ -20,6 +34,34 @@ Este projeto é uma API REST.
 ```bash
 ./gradlew bootRun
 ```
+
+O backend estará disponível em: **http://localhost:8080**
+
+### Frontend
+
+1. Navegue até a pasta do frontend:
+```bash
+cd spotify-frontend
+```
+
+2. Instale as dependências:
+```bash
+npm install --legacy-peer-deps
+```
+
+3. Execute o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+
+O frontend estará disponível em: **http://localhost:3000**
+
+4. Para fazer build de produção:
+```bash
+npm run build
+```
+
+**Nota:** O frontend faz proxy automático das requisições `/api/*` para o backend em `http://localhost:8080`
 
 ## Endpoints
 
@@ -330,4 +372,3 @@ Authorization: Bearer <seu_token_jwt>
 ## Observações
 
 - Para mais detalhes, consulte a documentação Swagger em: http://localhost:8080/swagger-ui/index.html
-
