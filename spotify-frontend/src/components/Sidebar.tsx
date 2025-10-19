@@ -47,15 +47,19 @@ export const Sidebar: React.FC = () => {
         <div className="mt-8 pt-8 border-t border-spotify-gray">
           <button
             onClick={() => navigate('/add-music')}
-            className="flex items-center gap-4 w-full px-4 py-3 text-spotify-lightgray hover:text-white transition-colors group"
+            className={`flex items-center gap-4 w-full px-4 py-3 rounded-md transition-colors ${
+              isActive('/add-music')
+                ? 'bg-spotify-gray text-white'
+                : 'text-spotify-lightgray hover:text-white'
+            }`}
           >
-            <Plus className="w-6 h-6 group-hover:text-white" />
+            <Plus className="w-6 h-6 !text-inherit" />
             <span className="font-semibold">Adicionar Música</span>
           </button>
           <button
-            className="flex items-center gap-4 w-full px-4 py-3 text-spotify-lightgray hover:text-white transition-colors group"
+            className="flex items-center gap-4 w-full px-4 py-3 text-spotify-lightgray hover:text-white transition-colors group rounded-md"
           >
-            <Heart className="w-6 h-6 group-hover:text-white" />
+            <Heart className="w-6 h-6 !text-inherit" />
             <span className="font-semibold">Músicas Curtidas</span>
           </button>
         </div>
