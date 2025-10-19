@@ -111,7 +111,7 @@ export const AddMusicPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-spotify-green text-black font-bold py-3 rounded-full hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-spotify-green text-white font-bold py-3 rounded-full hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Adicionando...' : 'Adicionar Música'}
                   </button>
