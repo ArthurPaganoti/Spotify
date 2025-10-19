@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Search, Library, Plus, Heart, LogOut, Music } from 'lucide-react';
+import { Home, Search, Library, Plus, Heart, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,8 +20,8 @@ export const Sidebar: React.FC = () => {
     <div className="bg-black w-64 h-full flex flex-col p-6">
       <div className="mb-8">
         <h1 className="text-spotify-green text-3xl font-bold flex items-center gap-2">
-          <Music className="w-8 h-8" />
-          Spotify
+          <img src="/papagaio-icon.png" alt="Wild Music" className="w-10 h-10 rounded-full object-cover" />
+          Wild Music
         </h1>
       </div>
 
@@ -47,15 +47,15 @@ export const Sidebar: React.FC = () => {
         <div className="mt-8 pt-8 border-t border-spotify-gray">
           <button
             onClick={() => navigate('/add-music')}
-            className="flex items-center gap-4 w-full px-4 py-3 text-spotify-lightgray hover:text-white transition-colors"
+            className="flex items-center gap-4 w-full px-4 py-3 text-spotify-lightgray hover:text-white transition-colors group"
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-6 h-6 group-hover:text-white" />
             <span className="font-semibold">Adicionar Música</span>
           </button>
           <button
-            className="flex items-center gap-4 w-full px-4 py-3 text-spotify-lightgray hover:text-white transition-colors"
+            className="flex items-center gap-4 w-full px-4 py-3 text-spotify-lightgray hover:text-white transition-colors group"
           >
-            <Heart className="w-6 h-6" />
+            <Heart className="w-6 h-6 group-hover:text-white" />
             <span className="font-semibold">Músicas Curtidas</span>
           </button>
         </div>

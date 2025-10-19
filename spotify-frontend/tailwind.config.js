@@ -8,7 +8,7 @@ export default {
     extend: {
       colors: {
         spotify: {
-          green: '#1DB954',
+          green: '#9333ea',      // Roxo principal Wild Music
           black: '#191414',
           darkgray: '#121212',
           gray: '#282828',
@@ -23,4 +23,3 @@ export default {
   },
   plugins: [],
 }
-

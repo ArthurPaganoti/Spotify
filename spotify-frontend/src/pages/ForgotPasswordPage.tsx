@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Music, Mail, ArrowLeft } from 'lucide-react';
+import { Mail, ArrowLeft } from 'lucide-react';
 import { authService } from '../services/authService';
 
 export const ForgotPasswordPage: React.FC = () => {
@@ -31,8 +31,8 @@ export const ForgotPasswordPage: React.FC = () => {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Music className="w-12 h-12 text-spotify-green" />
-            <h1 className="text-spotify-green text-4xl font-bold">Spotify</h1>
+            <img src="/papagaio-icon.png" alt="Wild Music" className="w-12 h-12 rounded-full object-cover" />
+            <h1 className="text-spotify-green text-4xl font-bold">Wild Music</h1>
           </div>
           <h2 className="text-white text-2xl font-bold">Recuperar Senha</h2>
           <p className="text-spotify-lightgray mt-2">
@@ -75,7 +75,7 @@ export const ForgotPasswordPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-spotify-green text-black font-bold py-3 rounded-full hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-spotify-green text-black font-bold py-3 rounded-full hover:bg-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Enviando...' : 'Enviar Código'}
             </button>
@@ -104,4 +104,3 @@ export const ForgotPasswordPage: React.FC = () => {
     </div>
   );
 };
-

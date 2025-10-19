@@ -26,19 +26,26 @@ export const HomePage: React.FC = () => {
     <div className="flex h-screen bg-black">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black">
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black relative">
+        {/* Imagem do corvo discreta no canto */}
+        <img
+          src="/papagaio-icon.png"
+          alt=""
+          className="absolute top-8 right-8 w-16 h-16 opacity-10 pointer-events-none"
+        />
+
         <div className="p-8">
           <div className="mb-8">
             <h1 className="text-white text-4xl font-bold mb-2 flex items-center gap-3">
               <PlayCircle className="w-10 h-10 text-spotify-green" />
-              Bem-vindo ao Spotify
+              Bem-vindo ao Wild Music
             </h1>
             <p className="text-spotify-lightgray text-lg">
               Explore e gerencie suas músicas favoritas
             </p>
             <button
               onClick={() => refetch()}
-              className="mt-4 bg-spotify-green text-black px-6 py-2 rounded-full hover:bg-green-400 transition-colors flex items-center gap-2 font-semibold"
+              className="mt-4 bg-spotify-green text-black px-6 py-2 rounded-full hover:bg-purple-500 transition-colors flex items-center gap-2 font-semibold"
             >
               <RefreshCw className="w-5 h-5" />
               Recarregar Músicas
