@@ -25,7 +25,7 @@ export const musicSchema = z.object({
 export const musicByLyricsSchema = z.object({
   lyrics: z.string()
     .min(10, 'Digite pelo menos 10 caracteres da letra')
-    .max(500, 'O trecho da letra deve ter no máximo 500 caracteres')
+    .max(1000, 'O trecho da letra deve ter no máximo 1000 caracteres')
     .trim(),
   genre: z.string()
     .max(50, 'O gênero deve ter no máximo 50 caracteres')
@@ -85,4 +85,3 @@ export type MusicByLyricsFormData = z.infer<typeof musicByLyricsSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
-

@@ -8,7 +8,6 @@ export const useCollaboratorInvites = () => {
       const response = await collaboratorService.getMyInvites();
       return response.content;
     },
-    refetchInterval: 30000, // Atualizar a cada 30 segundos
+    refetchInterval: 30000,
   });
 };
-
