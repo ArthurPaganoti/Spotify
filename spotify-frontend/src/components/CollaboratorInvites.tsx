@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Mail, Check, X, Music } from 'lucide-react';
 import { CollaboratorInviteDTO } from '../types';
 import { collaboratorService } from '../services/collaboratorService';
@@ -8,6 +9,7 @@ const CollaboratorInvites: React.FC = () => {
   const [invites, setInvites] = useState<CollaboratorInviteDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     loadInvites();
@@ -31,7 +33,10 @@ const CollaboratorInvites: React.FC = () => {
       setProcessingId(inviteId);
       const response = await collaboratorService.acceptInvite(inviteId);
       toast.success(response.message || 'Convite aceito com sucesso!');
-      loadInvites();
+      await loadInvites();
+      queryClient.invalidateQueries({ queryKey: ['collaboratorInvites'] });
+      queryClient.invalidateQueries({ queryKey: ['myPlaylists'] });
+      queryClient.invalidateQueries({ queryKey: ['accessiblePlaylists'] });
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erro ao aceitar convite');
     } finally {
@@ -44,7 +49,8 @@ const CollaboratorInvites: React.FC = () => {
       setProcessingId(inviteId);
       const response = await collaboratorService.rejectInvite(inviteId);
       toast.success(response.message || 'Convite rejeitado');
-      loadInvites();
+      await loadInvites();
+      queryClient.invalidateQueries({ queryKey: ['collaboratorInvites'] });
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erro ao rejeitar convite');
     } finally {
@@ -144,4 +150,3 @@ const CollaboratorInvites: React.FC = () => {
 };
 
 export default CollaboratorInvites;
-

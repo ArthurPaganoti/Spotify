@@ -64,17 +64,42 @@ const CollaboratorsModal: React.FC<CollaboratorsModalProps> = ({
   };
 
   const handleRemove = async (collaboratorId: number, userName: string) => {
-    if (!confirm(`Deseja realmente remover ${userName} como colaborador?`)) {
-      return;
-    }
-
-    try {
-      const response = await collaboratorService.removeCollaborator(playlistId, collaboratorId);
-      toast.success(response.message || 'Colaborador removido com sucesso!');
-      loadCollaborators();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erro ao remover colaborador');
-    }
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="font-semibold">Remover {userName} como colaborador?</p>
+        <p className="text-sm text-gray-300">Esta ação não pode ser desfeita.</p>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const response = await collaboratorService.removeCollaborator(playlistId, collaboratorId);
+                toast.success(response.message || 'Colaborador removido com sucesso!');
+                loadCollaborators();
+              } catch (error: any) {
+                toast.error(error.response?.data?.message || 'Erro ao remover colaborador');
+              }
+            }}
+            className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-semibold transition"
+          >
+            Sim, remover
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 font-semibold transition"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 10000,
+      style: {
+        background: '#1a1a1a',
+        color: '#fff',
+        border: '1px solid #333',
+      }
+    });
   };
 
   if (!isOpen) return null;
@@ -198,4 +223,3 @@ const CollaboratorsModal: React.FC<CollaboratorsModalProps> = ({
 };
 
 export default CollaboratorsModal;
-
