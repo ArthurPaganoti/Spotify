@@ -14,8 +14,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
-public class RateLimitInterceptor implements HandlerInterceptor {
+@Component("legacyRateLimitInterceptor")
+public class LegacyRateLimitInterceptor implements HandlerInterceptor {
 
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
