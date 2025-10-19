@@ -70,4 +70,16 @@ public class GlobalExceptionHandler {
     public ResponseDTO<Void> handleDuplicateMusic(DuplicateMusicException ex) {
         return ResponseDTO.error("DUPLICATE_MUSIC", ex.getMessage());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseDTO<Void> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseDTO.error("BAD_REQUEST", ex.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseDTO<Void> handleRuntimeException(RuntimeException ex) {
+        return ResponseDTO.error("INTERNAL_ERROR", ex.getMessage());
+    }
 }

@@ -35,6 +35,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configure(http))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/swagger-ui/**",
@@ -49,6 +50,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/users/**").authenticated()
                 .requestMatchers("/musics/**").authenticated()
+                .requestMatchers("/likes/**").authenticated()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
