@@ -26,5 +26,12 @@ export const profileService = {
   async deleteAvatar(): Promise<void> {
     await api.delete('/users/profile/avatar');
   },
-};
 
+  async changePassword(data: { newPassword: string }): Promise<void> {
+    await api.put('/users/profile/password', data);
+  },
+
+  async deleteAccount(): Promise<void> {
+    await api.delete('/users/profile/account');
+  },
+};
