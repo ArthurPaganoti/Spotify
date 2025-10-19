@@ -14,11 +14,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/users")
@@ -62,7 +63,11 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Deletar usuário", description = "Remove um usuário do sistema. Requer autenticação JWT.")
+    @Operation(
+        summary = "Deletar usuário",
+        description = "Remove um usuário do sistema. Requer autenticação JWT.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
@@ -73,9 +78,10 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class)))
     })
-    public ResponseEntity<ResponseDTO<Object>> deleteUser(@PathVariable String id, HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        ResponseDTO<Object> response = userService.deleteUser(Long.valueOf(id), token);
+    public ResponseEntity<ResponseDTO<Object>> deleteUser(
+            @PathVariable String id,
+            Authentication authentication) {
+        ResponseDTO<Object> response = userService.deleteUser(Long.valueOf(id), authentication.getName());
         return ResponseEntity.ok(response);
     }
 

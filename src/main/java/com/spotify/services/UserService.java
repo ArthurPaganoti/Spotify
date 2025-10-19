@@ -5,25 +5,22 @@ import com.spotify.business.ResponseDTO;
 import com.spotify.entities.User;
 import com.spotify.repositories.UserRepository;
 import com.spotify.exceptions.EmailAlreadyExistsException;
-import com.spotify.business.security.JwtUtil;
 import com.spotify.exceptions.ForbiddenOperationException;
-import com.spotify.exceptions.InvalidCredentialsException;
+import com.spotify.exceptions.UserNotFoundException;
 import com.spotify.repositories.PasswordResetTokenRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordResetTokenRepository passwordResetTokenRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
-        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
@@ -41,18 +38,20 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseDTO<Object> deleteUser(Long id, String token) {
-        if (token == null || token.isEmpty())
-            throw new InvalidCredentialsException("Token JWT ausente ou inválido");
-        Long authenticatedUserId = jwtUtil.extractUserId(token);
-        if (!authenticatedUserId.equals(id))
+    public ResponseDTO<Object> deleteUser(Long id, String authenticatedEmail) {
+        User authenticatedUser = userRepository.findByEmail(authenticatedEmail)
+                .orElseThrow(() -> new UserNotFoundException("Usuário autenticado não encontrado"));
+
+        if (!authenticatedUser.getId().equals(id)) {
             throw new ForbiddenOperationException("Operação não permitida. Você só pode deletar o próprio usuário.");
+        }
+
         return userRepository.findById(id)
                 .map(user -> {
                     passwordResetTokenRepository.deleteByUser(user);
                     userRepository.deleteById(id);
                     return ResponseDTO.success("Usuário deletado com sucesso");
                 })
-                .orElseThrow(() -> new com.spotify.exceptions.UserNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
     }
 }
