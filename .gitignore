@@ -65,23 +65,10 @@ bin/
 .DS_Store
 
 # Firebase credentials - IMPORTANTE: NÃO COMMITAR!
-*firebase*.json
-firebase-credentials/
-serviceAccountKey.json
+**/serviceAccountKey.json
+**/firebase-credentials.json
+wild-music-fc969-firebase-adminsdk-fbsvc-*.json
 
-# Environment variables
+# Environment variables and secrets
 .env
-.env.local
-.env.*.local
-
-# Node modules (frontend)
-node_modules/
-spotify-frontend/node_modules/
-spotify-frontend/dist/
-spotify-frontend/.env
-spotify-frontend/.env.local
-
-# Application properties with sensitive data (optional)
-application-local.yml
-application-prod.yml
-
+src/main/resources/application-local.yml
