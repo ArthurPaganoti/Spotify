@@ -3,11 +3,9 @@ package com.spotify.services;
 import com.spotify.business.ResponseDTO;
 import com.spotify.business.dto.PasswordResetConfirmDTO;
 import com.spotify.business.dto.PasswordResetRequestDTO;
-import com.spotify.entities.PasswordResetToken;
 import com.spotify.entities.User;
 import com.spotify.exceptions.InvalidTokenException;
 import com.spotify.exceptions.UserNotFoundException;
-import com.spotify.repositories.PasswordResetTokenRepository;
 import com.spotify.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +18,7 @@ import java.util.Base64;
 
 @Service
 public class PasswordResetService {
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final RedisPasswordResetService redisPasswordResetService;
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
@@ -30,11 +28,11 @@ public class PasswordResetService {
     private int tokenExpirationHours;
 
     public PasswordResetService(
-            PasswordResetTokenRepository passwordResetTokenRepository,
+            RedisPasswordResetService redisPasswordResetService,
             UserRepository userRepository,
             EmailService emailService,
             PasswordEncoder passwordEncoder) {
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.redisPasswordResetService = redisPasswordResetService;
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
@@ -45,17 +43,11 @@ public class PasswordResetService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado com o email fornecido"));
 
-        passwordResetTokenRepository.deleteByUser(user);
+        redisPasswordResetService.deleteAllTokensByEmail(user.getEmail());
 
         String token = generateSecureToken();
         
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
-        resetToken.setUser(user);
-        resetToken.setExpiresAt(LocalDateTime.now().plusHours(tokenExpirationHours));
-        resetToken.setUsed(false);
-        
-        passwordResetTokenRepository.save(resetToken);
+        redisPasswordResetService.saveResetToken(token, user.getEmail(), tokenExpirationHours);
 
         emailService.sendPasswordResetEmail(user.getEmail(), token, user.getName());
 
@@ -64,43 +56,31 @@ public class PasswordResetService {
 
     @Transactional
     public ResponseDTO<String> resetPassword(PasswordResetConfirmDTO request) {
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
-                .orElseThrow(() -> new InvalidTokenException("Token inválido"));
+        String email = redisPasswordResetService.getEmailByToken(request.getToken());
 
-        validateToken(resetToken);
+        if (email == null) {
+            throw new InvalidTokenException("Token inválido ou expirado");
+        }
 
-        User user = resetToken.getUser();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             throw new com.spotify.exceptions.BusinessException("A nova senha deve ser diferente da senha anterior");
         }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
 
-        resetToken.setUsed(true);
-        passwordResetTokenRepository.save(resetToken);
+        redisPasswordResetService.deleteToken(request.getToken());
 
         return ResponseDTO.success("Senha alterada com sucesso");
-    }
-
-    private void validateToken(PasswordResetToken resetToken) {
-        if (resetToken.isUsed()) {
-            throw new InvalidTokenException("Este token já foi utilizado");
-        }
-
-        if (LocalDateTime.now().isAfter(resetToken.getExpiresAt())) {
-            throw new InvalidTokenException("Token expirado");
-        }
     }
 
     private String generateSecureToken() {
         byte[] randomBytes = new byte[32];
         secureRandom.nextBytes(randomBytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-    }
-
-    @Transactional
-    public void cleanupExpiredTokens() {
-        passwordResetTokenRepository.deleteByExpiresAtBefore(LocalDateTime.now());
     }
 }

@@ -7,7 +7,6 @@ import com.spotify.repositories.UserRepository;
 import com.spotify.exceptions.EmailAlreadyExistsException;
 import com.spotify.exceptions.ForbiddenOperationException;
 import com.spotify.exceptions.UserNotFoundException;
-import com.spotify.repositories.PasswordResetTokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final RedisPasswordResetService redisPasswordResetService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordResetTokenRepository passwordResetTokenRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RedisPasswordResetService redisPasswordResetService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.redisPasswordResetService = redisPasswordResetService;
     }
 
     @Transactional
@@ -48,7 +47,7 @@ public class UserService {
 
         return userRepository.findById(id)
                 .map(user -> {
-                    passwordResetTokenRepository.deleteByUser(user);
+                    redisPasswordResetService.deleteAllTokensByEmail(user.getEmail());
                     userRepository.deleteById(id);
                     return ResponseDTO.success("Usuário deletado com sucesso");
                 })
