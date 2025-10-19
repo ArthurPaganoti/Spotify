@@ -1,11 +1,15 @@
 package com.spotify.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "music", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name", "band", "genre"})
+    @UniqueConstraint(columnNames = {"name", "band"})
 })
 public class Music {
     @Id
@@ -21,8 +25,20 @@ public class Music {
     @Column(nullable = false, length = 200)
     private String band;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "created_by_user_id", nullable = false,
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
+    @Column(name = "image_file_id", length = 100)
+    private String imageFileId;
+
+    @Column(name = "youtube_video_id", length = 20)
+    private String youtubeVideoId;
+
+    @Column(name = "youtube_thumbnail_url", length = 500)
+    private String youtubeThumbnailUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id", nullable = true,
                 foreignKey = @ForeignKey(name = "fk_music_created_by_user"))
     private User createdBy;
 
@@ -31,25 +47,4 @@ public class Music {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
-
-    public String getBand() { return band; }
-    public void setBand(String band) { this.band = band; }
-
-    public User getCreatedBy() { return createdBy; }
-    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
