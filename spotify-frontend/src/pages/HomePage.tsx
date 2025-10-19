@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { musicService } from '../services/musicService';
 import { MusicCard } from '../components/MusicCard';
 import { Sidebar } from '../components/Sidebar';
+import { Footer } from '../components/Footer';
 import { PlayCircle, RefreshCw } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -26,7 +27,7 @@ export const HomePage: React.FC = () => {
     <div className="flex h-screen bg-black">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black relative">
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-spotify-darkgray to-black relative flex flex-col">
         {/* Imagem do corvo discreta no canto */}
         <img
           src="/papagaio-icon.png"
@@ -34,7 +35,7 @@ export const HomePage: React.FC = () => {
           className="absolute top-8 right-8 w-16 h-16 opacity-10 pointer-events-none"
         />
 
-        <div className="p-8">
+        <div className="p-8 flex-1">
           <div className="mb-8">
             <h1 className="text-white text-4xl font-bold mb-2 flex items-center gap-3">
               <PlayCircle className="w-10 h-10 text-spotify-green" />
@@ -97,6 +98,8 @@ export const HomePage: React.FC = () => {
             </div>
           )}
         </div>
+
+        <Footer />
       </main>
     </div>
   );
