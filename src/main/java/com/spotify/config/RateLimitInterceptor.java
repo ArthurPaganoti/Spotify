@@ -26,21 +26,18 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (!(handler instanceof HandlerMethod)) {
+        if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
         }
 
-        HandlerMethod handlerMethod = (HandlerMethod) handler;
         StrictRateLimit strictRateLimit = handlerMethod.getMethodAnnotation(StrictRateLimit.class);
 
         String clientIP = ClientIPUtil.getClientIP(request);
         Bucket bucket;
 
         if (strictRateLimit != null) {
-            // Usa rate limit estrito para endpoints anotados
             bucket = rateLimitingConfig.resolveStrictBucket(clientIP);
         } else {
-            // Usa rate limit padrão
             bucket = rateLimitingConfig.resolveBucket(clientIP);
         }
 
@@ -60,19 +57,3 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return true;
     }
 }
-package com.spotify.business.security;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-/**
- * Anotação para aplicar rate limiting estrito em endpoints específicos.
- * Endpoints anotados terão um limite mais restrito de requisições.
- */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface StrictRateLimit {
-}
-

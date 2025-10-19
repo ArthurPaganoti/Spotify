@@ -20,7 +20,6 @@ public class RateLimitingConfig {
     }
 
     private Bucket createNewBucket() {
-        // 100 requisições por minuto
         Bandwidth limit = Bandwidth.classic(100, Refill.intervally(100, Duration.ofMinutes(1)));
         return Bucket.builder()
                 .addLimit(limit)
@@ -32,7 +31,6 @@ public class RateLimitingConfig {
     }
 
     private Bucket createStrictBucket() {
-        // 20 requisições por minuto para operações mais sensíveis
         Bandwidth limit = Bandwidth.classic(20, Refill.intervally(20, Duration.ofMinutes(1)));
         return Bucket.builder()
                 .addLimit(limit)

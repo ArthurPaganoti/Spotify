@@ -15,22 +15,14 @@ public class RateLimitService {
         this.rateLimitingConfig = rateLimitingConfig;
     }
 
-    /**
-     * Verifica se a requisição pode ser processada baseado no rate limit
-     * @param request HttpServletRequest para extrair o IP
-     * @return true se pode processar, false se excedeu o limite
-     */
+
     public boolean allowRequest(HttpServletRequest request) {
         String clientIP = ClientIPUtil.getClientIP(request);
         Bucket bucket = rateLimitingConfig.resolveBucket(clientIP);
         return bucket.tryConsume(1);
     }
 
-    /**
-     * Verifica se a requisição pode ser processada baseado no rate limit estrito
-     * @param request HttpServletRequest para extrair o IP
-     * @return true se pode processar, false se excedeu o limite
-     */
+
     public boolean allowStrictRequest(HttpServletRequest request) {
         String clientIP = ClientIPUtil.getClientIP(request);
         Bucket bucket = rateLimitingConfig.resolveStrictBucket(clientIP);
