@@ -89,7 +89,16 @@ public class LikeService {
 
         Page<Like> likesPage = likeRepository.findByUserOrderByCreatedAtDesc(user, pageable);
 
-        return likesPage.map(like -> musicMapper.toResponseDTO(like.getMusic(), user));
+        logger.info("Found {} liked musics for user: {}", likesPage.getTotalElements(), email);
+        logger.info("Liked musics IDs: {}", likesPage.getContent().stream()
+                .map(like -> like.getMusic().getId())
+                .collect(java.util.stream.Collectors.toList()));
+
+        Page<MusicResponseDTO> result = likesPage.map(like -> musicMapper.toResponseDTO(like.getMusic(), user));
+
+        logger.info("Returning {} musics in response", result.getContent().size());
+
+        return result;
     }
 
     public long getLikesCount(String musicId) {

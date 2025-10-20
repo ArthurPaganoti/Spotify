@@ -15,15 +15,6 @@ export const likeService = {
     const response = await api.get<ResponseDTO<PageResponse<MusicResponseDTO>>>('/likes', {
       params: { page, size }
     });
-    return response.data?.content || {
-      content: [],
-      totalElements: 0,
-      totalPages: 0,
-      size: 0,
-      number: 0,
-      first: true,
-      last: true,
-      empty: true
-    };
+    return response.data.content;
   },
 };
