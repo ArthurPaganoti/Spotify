@@ -4,12 +4,14 @@ import { Sidebar } from '../components/Sidebar';
 import { Footer } from '../components/Footer';
 import { ProfileMenu } from '../components/ProfileMenu';
 import { profileService } from '../services/profileService';
-import { Key, Lock, Save, ArrowLeft } from 'lucide-react';
+import { Key, Save, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -91,15 +93,24 @@ export const ChangePasswordPage: React.FC = () => {
                   <Key className="w-4 h-4" />
                   Nova Senha
                 </label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-black text-white px-4 py-3 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
-                  required
-                  minLength={6}
-                  placeholder="Digite sua nova senha (mín. 6 caracteres)"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full bg-black text-white px-4 py-3 pr-12 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
+                    required
+                    minLength={6}
+                    placeholder="Digite sua nova senha (mín. 6 caracteres)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-spotify-lightgray hover:text-white transition-colors"
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -107,15 +118,24 @@ export const ChangePasswordPage: React.FC = () => {
                   <Key className="w-4 h-4" />
                   Confirmar Nova Senha
                 </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-black text-white px-4 py-3 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
-                  required
-                  minLength={6}
-                  placeholder="Digite novamente a nova senha"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-black text-white px-4 py-3 pr-12 rounded-lg border border-spotify-gray focus:border-spotify-green focus:outline-none"
+                    required
+                    minLength={6}
+                    placeholder="Digite novamente a nova senha"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-spotify-lightgray hover:text-white transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
               <div className="bg-spotify-gray/50 rounded-lg p-4 mt-6">
