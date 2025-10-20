@@ -60,9 +60,9 @@ export const Sidebar: React.FC = () => {
             <span className="font-semibold">Adicionar Música</span>
           </button>
           <button
-            onClick={() => navigate('/liked-musics')}
+            onClick={() => navigate('/liked')}
             className={`flex items-center gap-4 w-full px-4 py-3 rounded-md transition-colors ${
-              isActive('/liked-musics')
+              isActive('/liked')
                 ? 'bg-spotify-gray text-white'
                 : 'text-spotify-lightgray hover:text-white'
             }`}
@@ -71,9 +71,9 @@ export const Sidebar: React.FC = () => {
             <span className="font-semibold">Músicas Curtidas</span>
           </button>
           <button
-            onClick={() => navigate('/collaborator-invites')}
+            onClick={() => navigate('/invites')}
             className={`flex items-center gap-4 w-full px-4 py-3 rounded-md transition-colors relative ${
-              isActive('/collaborator-invites')
+              isActive('/invites')
                 ? 'bg-spotify-gray text-white'
                 : 'text-spotify-lightgray hover:text-white'
             }`}
