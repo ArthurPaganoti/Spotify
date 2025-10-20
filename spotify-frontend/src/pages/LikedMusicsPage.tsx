@@ -12,7 +12,7 @@ export const LikedMusicsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: musicsData, isLoading} = useQuery({
     queryKey: ['likedMusics'],
-    queryFn: likeService.getLikedMusics,
+    queryFn: () => likeService.getLikedMusics(0, 50),
     staleTime: 0,
     refetchOnMount: 'always',
   });
@@ -20,7 +20,6 @@ export const LikedMusicsPage: React.FC = () => {
   const musics = musicsData?.content || [];
 
   const handleLikeChange = async () => {
-    // Invalida TODOS os caches relacionados a músicas
     await queryClient.invalidateQueries({ queryKey: ['musics'] });
     await queryClient.invalidateQueries({ queryKey: ['likedMusics'] });
   };
