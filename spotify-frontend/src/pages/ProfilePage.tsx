@@ -352,7 +352,7 @@ export const ProfilePage: React.FC = () => {
 
               <div className="mt-6 pt-6 border-t border-spotify-gray space-y-3">
                 <button
-                  onClick={() => navigate('/profile/change-password')}
+                  onClick={() => navigate('/change-password')}
                   className="w-full bg-spotify-gray text-white px-6 py-3 rounded-full hover:bg-spotify-gray/80 transition-colors flex items-center justify-center gap-2 font-semibold"
                 >
                   <Key className="w-5 h-5" />
