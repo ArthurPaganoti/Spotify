@@ -95,12 +95,12 @@ export const ProfileMenu: React.FC = () => {
             <button
               onClick={() => {
                 setIsOpen(false);
-                navigate('/profile/change-password');
+                navigate('/change-password');
               }}
               className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-spotify-gray transition-colors"
             >
               <Key className="w-5 h-5 text-spotify-green" />
-              <span>Redefinir Senha</span>
+              <span>Alterar Senha</span>
             </button>
           </div>
 
@@ -118,4 +118,3 @@ export const ProfileMenu: React.FC = () => {
     </div>
   );
 };
-
