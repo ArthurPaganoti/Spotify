@@ -14,9 +14,23 @@ import { EditMusicPage } from './pages/EditMusicPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { LikedMusicsPage } from './pages/LikedMusicsPage';
-import AddMusicByLyricsPage from './pages/AddMusicByLyricsPage';
 import { PlaylistDetailPage } from './pages/PlaylistDetailPage';
 import CollaboratorInvitesPage from './pages/CollaboratorInvitesPage';
+import { useAuth } from './contexts/AuthContext';
+
+const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-spotify-green"></div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <Navigate to="/home" replace /> : <>{children}</>;
+};
 
 function App() {
   return (
@@ -46,8 +60,16 @@ function App() {
           }}
         />
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          } />
+          <Route path="/register" element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          } />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
@@ -91,26 +113,10 @@ function App() {
             }
           />
           <Route
-            path="/add-music-by-lyrics"
-            element={
-              <PrivateRoute>
-                <AddMusicByLyricsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
             path="/edit-music/:id"
             element={
               <PrivateRoute>
                 <EditMusicPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/liked-musics"
-            element={
-              <PrivateRoute>
-                <LikedMusicsPage />
               </PrivateRoute>
             }
           />
@@ -123,7 +129,7 @@ function App() {
             }
           />
           <Route
-            path="/profile/change-password"
+            path="/change-password"
             element={
               <PrivateRoute>
                 <ChangePasswordPage />
@@ -131,7 +137,15 @@ function App() {
             }
           />
           <Route
-            path="/collaborator-invites"
+            path="/liked"
+            element={
+              <PrivateRoute>
+                <LikedMusicsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/invites"
             element={
               <PrivateRoute>
                 <CollaboratorInvitesPage />
@@ -139,6 +153,7 @@ function App() {
             }
           />
           <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
