@@ -118,7 +118,7 @@ O backend estará disponível em: **http://localhost:8080**
 
 1. Navegue até a pasta do frontend:
 ```bash
-cd spotify-frontend
+cd client
 ```
 
 2. Instale as dependências:
